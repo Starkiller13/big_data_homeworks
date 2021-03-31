@@ -59,8 +59,16 @@ def doit2(data,K):
                 .flatMap(map4)# <- MAP PHASE R2
                 .groupByKey()# <- REDECE PHASE R2
                 .flatMap(map5)
+                .reduceByKey(lambda x,y: max(x,y))
                 )
     return maxnorm
+
+def doit3(data,T):
+    tmax = (data.map(lambda x: (x[1],x[0]))
+            .sortByKey(False)
+            .take(T))
+    tmax = [(x[1],x[0]) for x in tmax]
+    return tmax
 
 def main():
     assert len(sys.argv) == 4, "Usage: python G33HW1.py <K> <T> <file_name>"
@@ -74,7 +82,7 @@ def main():
     
     T = sys.argv[2]
     assert T.isdigit(), "T must be an integer"
-    T = int(K)
+    T = int(T)
     
     data_path = sys.argv[3]
     assert os.path.isfile(data_path), "File or folder not found"
@@ -82,7 +90,10 @@ def main():
     RawData.repartition(numPartitions=K)
     normalizedRatings = doit(RawData,K) #NORM RATINGS CALC
     maxNormRatings = doit2(normalizedRatings,K) # MAX NORM RATING CALC
-
-
+    tmax = doit3(maxNormRatings,T)
+    print("INPUT PARAMETERS: K=%d T=%d file=%s\n"%(K,T,data_path))
+    print("OUTPUT:")
+    for i in tmax:
+        print("Product %s maxNormRating %f"%(i))
 if __name__ == "__main__":
 	main()

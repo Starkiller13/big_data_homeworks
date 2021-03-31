@@ -1,0 +1,13 @@
+INPUT PARAMETERS: K=4 T=10 file=input_20K.csv
+
+OUTPUT:
+Product B001G583TS maxNormRating 3.0
+Product B00005N7SG maxNormRating 2.75
+Product B00005N7VP maxNormRating 2.6666667
+Product B000066SZO maxNormRating 2.6666667
+Product B000302EG0 maxNormRating 2.6666667
+Product B00005N7QG maxNormRating 2.5
+Product B00571VZP6 maxNormRating 2.5
+Product B00005N7QO maxNormRating 2.3333333
+Product B00008GT11 maxNormRating 2.3333333
+Product B00006LL1D maxNormRating 2.25
