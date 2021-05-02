@@ -11,7 +11,6 @@ def strToTuple(line):
     
 
 def main():
-    print(len(sys.argv))
     assert len(sys.argv) == 2, "Usage: python G33HW1.py <file_name>"
     
     conf = SparkConf().setAppName('G33HW2').setMaster("local[*]")
@@ -20,12 +19,13 @@ def main():
     data_path = sys.argv[1]
     assert os.path.isfile(data_path), "File or folder not found"
     RawData = sc.textFile(data_path).cache()
-    RawData = RawData.flatMap(strToTuple)
-    v = sorted(RawData.countByValue().items()) 
-    print(v)
-    v = v[:,1]
+    RawData = RawData.map(strToTuple)
     
-    sharedClusterSize = sc.broadcast(v)
+    C = sorted(RawData.map(lambda x: x[1]).countByValue().items()) 
+    C = [C[i][1] for i in range(len(C))]
+    
+    sharedClusterSize = sc.broadcast(C)
+    
 
-if __name__ == "main":
+if __name__ == "__main__":
     main()
