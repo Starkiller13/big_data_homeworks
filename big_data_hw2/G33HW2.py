@@ -13,11 +13,11 @@ def strToTuple(line):
     point = tuple(float(ch[i]) for i in range(len(ch)-1))
     return (point, int(ch[-1]))    
 
-def map1(elem, smp, cl_s, t, k):
+def map1(elem, smp, cl_s, t, k, S_):
     x = elem[0]
     y = elem[1]
-    c_sum = sum([dist(x,p[0]) for p in [x for x in smp if x[1]==y]])
-    l_sums = [sum([dist(x,p[0]) for p in [x for x in smp if x[1]==j]])/min(t,cl_s[j]) for j in range(0,k) if j!=y]
+    c_sum = sum([dist(x,p) for p in S_[y]])
+    l_sums = [sum([dist(x,p) for p in S_[j]])/min(t,cl_s[j]) for j in range(0,k) if j!=y]
     a = c_sum/min(t,cl_s[y]-1)
     b = min(l_sums)
     return (0,(b-a)/max(b,a))
@@ -59,12 +59,16 @@ def main():
     fullClustering = sc.textFile(data_path, minPartitions=8).cache()
     fullClustering = fullClustering.map(strToTuple)
     
-    C = sorted(fullClustering.map(lambda x: x[1]).countByValue().items()) 
+    C = sorted(fullClustering.map(lambda x: x[1]).countByValue().items())
+     
     C = [C[i][1] for i in range(len(C))]
     
     sharedClusterSize = sc.broadcast(C)
     
     samples = fullClustering.map(lambda x : x if rand.random()<=min(t/sharedClusterSize.value[x[1]],1) else None).filter(lambda x: x!=None)
+    S_ = sorted(samples.map(lambda x: (x[1],x[0])).groupByKey().collect())
+    S_ = [list(x[1]) for x in S_]
+    
     C_s = sorted(samples.map(lambda x: x[1]).countByValue().items()) 
     C_s = [C_s[i][1] for i in range(len(C_s))]
     samples = samples.collect()
@@ -77,8 +81,8 @@ def main():
     for i in range(t):
         x = samples[i][0]
         y = samples[i][1]
-        c_sum = sum([dist(x,p[0]) for p in [x for x in samples if x[1]==y]])
-        l_sums = [sum([dist(x,p[0]) for p in [x for x in samples if x[1]==j]])/C_s[j] for j in range(0,k) if j!=y]
+        c_sum = sum([dist(x,p) for p in S_[y]])
+        l_sums = [sum([dist(x,p) for p in S_[j]])/C_s[j] for j in range(0,k) if j!=y]
         a = c_sum/(C_s[y]-1)
         b = min(l_sums)
         s.append((b-a)/max(b,a))
@@ -89,7 +93,7 @@ def main():
     start0 = time.time_ns()
     
     N = fullClustering.count()
-    fullClustering = (fullClustering.map(lambda x: map1(x,clusteringSample.value, sharedClusterSize.value, t, k))
+    fullClustering = (fullClustering.map(lambda x: map1(x,clusteringSample.value, sharedClusterSize.value, t, k,S_))
             .reduceByKey(add))
     approxSilhFull = float(fullClustering.collect()[0][1])/N
     
@@ -99,6 +103,7 @@ def main():
     print("Time to compute approxSilhFull = %d ms"%(int((end0-start0)/1000000)))
     print("Value of exactSilhSample = %f"%(exactSilhSample))
     print("Time to compute exactSilhSample = %d ms"%(int((end1-start1)/1000000)))
+    
     
     
 if __name__ == "__main__":
