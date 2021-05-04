@@ -2,6 +2,7 @@ from pyspark import SparkContext, SparkConf
 import sys
 import os
 import random as rand
+from operator import add
 import math
 import time
 
@@ -17,7 +18,7 @@ def map1(elem, smp, cl_s, t, k):
     l_sums = [sum([dist(x,p[0]) for p in [x for x in smp if x[1]==j]])/min(t,cl_s[j]) for j in range(0,k) if j!=y]
     a = c_sum/min(t,cl_s[y])
     b = min(l_sums)
-    return (b-a)/max(b,a)
+    return (0,(b-a)/max(b,a))
 
 def dist(x,y):
     l = [(x[i]-y[i])**2 for i in range(len(x))]
@@ -42,7 +43,7 @@ def main():
     assert t.isdigit(), "t must be an integer"
     t = int(t)
     
-    fullClustering = sc.textFile(data_path).cache()
+    fullClustering = sc.textFile(data_path, minPartitions=10).cache()
     fullClustering = fullClustering.map(strToTuple)
     
     C = sorted(fullClustering.map(lambda x: x[1]).countByValue().items()) 
@@ -50,21 +51,32 @@ def main():
     
     sharedClusterSize = sc.broadcast(C)
     
-    samples = fullClustering.map(lambda x : x if rand.random()<=min(t/sharedClusterSize.value[x[1]],1) else None).filter(lambda x: x!=None).cache()
+    samples = fullClustering.map(lambda x : x if rand.random()<=min(t/sharedClusterSize.value[x[1]],1) else None).filter(lambda x: x!=None).collect()
     
-    clusteringSample = sc.broadcast(samples.collect())
+    clusteringSample = sc.broadcast(samples)
     
     start1 = time.time_ns()
     
-    samples = samples.map(lambda x: map1(x,clusteringSample.value, sharedClusterSize.value, t, k)).collect()
-    exactSilhSample = sum(samples)/len(samples)
+    s = []
+    for i in range(t):
+        x = samples[i][0]
+        y = samples[i][1]
+        c_sum = sum([dist(x,p[0]) for p in [x for x in samples if x[1]==y]])
+        l_sums = [sum([dist(x,p[0]) for p in [x for x in samples if x[1]==j]])/C[j] for j in range(0,k) if j!=y]
+        a = c_sum/min(t,C[y])
+        b = min(l_sums)
+        s.append((b-a)/max(b,a))
+    #samples = samples.map(lambda x: map1(x,clusteringSample.value, sharedClusterSize.value, t, k)).collect()
+    exactSilhSample = sum(s)/t
     
     end1 = time.time_ns()
     
     start0 = time.time_ns()
     
-    fullClustering = fullClustering.map(lambda x: map1(x,clusteringSample.value, sharedClusterSize.value, t, k)).collect()
-    approxSilhFull = sum(fullClustering)/len(fullClustering)
+    N = fullClustering.count()
+    fullClustering = (fullClustering.map(lambda x: map1(x,clusteringSample.value, sharedClusterSize.value, t, k))
+            .reduceByKey(add))
+    approxSilhFull = fullClustering.take(1)[1]/N
     
     end0 = time.time_ns()
     
