@@ -1,0 +1,5 @@
+155
+Value of approxSilhFull = 0.316235
+Time to compute approxSilhFull = 48901 ms
+Value of exactSilhSample = 0.297276
+Time to compute exactSilhSample = 9 ms
