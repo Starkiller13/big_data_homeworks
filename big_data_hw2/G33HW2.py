@@ -23,8 +23,7 @@ def map1(elem, smp, cl_s, t, k, S_):
     return (0,(b-a)/max(b,a))
 
 def dist(x,y):
-    l = [(x[i]-y[i])**2 for i in range(len(x))]
-    l = sqrt(sum(l))
+    l = sum([(x[i]-y[i])**2 for i in range(len(x))])
     return l
 
 def Bernoulli(p, n=1): 
@@ -78,7 +77,7 @@ def main():
     start1 = time.time_ns()
     
     s = []
-    for i in range(t):
+    for i in range(len(samples)):
         x = samples[i][0]
         y = samples[i][1]
         c_sum = sum([dist(x,p) for p in S_[y]])
