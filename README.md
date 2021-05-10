@@ -33,6 +33,6 @@ cd /big_data_hw2
 python G33HW2.py <file_name> <k> <t>
 ```
 
-Mark: TDB
+Mark: TBD
 
 # Homework 3: TBD
