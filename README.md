@@ -12,6 +12,8 @@ pip install pyspark
 # Homework 1: User Ratings
 Basis of Map Reduce paradigm, our goal was to fetch and make some 
 operations over a online shopping dataset of reviews.
+Original instructions can be found [here](https://github.com/Starkiller13/big_data_homeworks/blob/final/big_data_hw1/hw1_description)
+
 Usage(starting from the main directory)
 ```bash
 cd /big_data_hw1
@@ -24,6 +26,7 @@ Mark: 7.0/7.0
 Starting from an already clustered pointset we had to compute an 
 approximate silhouette coefficient for the entire pointset and 
 the exact silhouette coefficient for a sample obtained using poisson sampling.
+Original instructions can be found [here](https://github.com/Starkiller13/big_data_homeworks/blob/final/big_data_hw2/hw2_description)
 
 Usage(starting from the main directory)
 ```bash
