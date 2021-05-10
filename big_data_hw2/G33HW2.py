@@ -85,7 +85,7 @@ def main():
     
     clusteringSample = sc.broadcast(samples)
     sampleClusterSize = sc.broadcast(C_s)#cluster size of sample
-    sampleSquares = sc.broadcast(s_sq)#sum of squares for every sample cluster
+    sampleSquares = sc.broadcast(s_sq)#sum of squares for every sample clusterg gg
     sampleSums = sc.broadcast(s_sums)#sum of vector for every sample cluster
     
     #Sequential exact silhouette coefficient for clusteringSample
@@ -103,14 +103,14 @@ def main():
         a = sums.pop(y)
         b = min(sums)
         s.append((b-a)/max(b,a))
-    exactSilhSample = flaot(sum(s)/len(s))
+    exactSilhSample = float(sum(s)/len(s))
 
     end_seq = time.time_ns()
     
     #MR approach to compute the approximate silhouette coefficient for fullClustering
     start_mr = time.time_ns()
     
-    fullClustering = (fullClustering.map(lambda x: bigBrainMap(x,sampleSums,sampleSquares,sampleClusterSize,sharedClusterSize,t))
+    fullClustering = (fullClustering.map(lambda x: bigBrainMap(x,sampleSums,sampleSquares,sampleClusterSize,sharedClusterSize,t)).cache()
             .reduceByKey(add))
     approxSilhFull = float(fullClustering.collect()[0][1])/N
     
