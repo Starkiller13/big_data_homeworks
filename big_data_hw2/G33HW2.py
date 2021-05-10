@@ -103,7 +103,7 @@ def main():
         a = sums.pop(y)
         b = min(sums)
         s.append((b-a)/max(b,a))
-    exactSilhSample = sum(s)/len(s)
+    exactSilhSample = flaot(sum(s)/len(s))
 
     end_seq = time.time_ns()
     
