@@ -23,7 +23,7 @@ Mark: 7.0/7.0
 # Homework 2: Clustering
 Starting from an already clustered pointset we had to compute an 
 approximate silhouette coefficient for the entire pointset and 
-the exact silhouette coefficient for a sample using poisson sampling.
+the exact silhouette coefficient for a sample obtained using poisson sampling.
 
 Usage(starting from the main directory)
 ```bash
