@@ -14,24 +14,12 @@ def strToTuple(line):
     point = tuple(float(ch[i]) for i in range(len(ch)-1))
     return (point, int(ch[-1]))    
 
-def map1(elem, smp, cl_s, t):
-    x = elem[0]
-    y = elem[1]
-    dists = [(p[1],dist(x,p[0])) for p in smp.value]
-    sums = [0 for i in range(len(cl_s.value))]
-    for i in dists:
-        sums[i[0]]+=i[1]
-    sums = [j/min(t,cl_s.value[i]) for i,j in enumerate(sums)]
-    print(sums)
-    a = sums.pop(y)
-    b = min(sums)
-    return (0,(b-a)/max(abs(b),abs(a)))
-
-def bigBrainMap(elem, c_sums, c_prods, s_sizes, c_sizes, t):
+def bigBrainMap(elem, s_sums, s_squares, s_sizes, c_sizes, t):
     x = elem[0]
     y = elem[1]
     x_sq = dot(x,x)
-    w = [(-2*dot(x,c_sums[i]) + c_prods[i] + s_sizes[i]*x_sq)/s_sizes[i] for i in range(len(c_sizes.value))]
+    w = [(-2*dot(x,s_sums.value[i]) + s_squares.value[i] + 
+          s_sizes.value[i]*x_sq)/s_sizes.value[i] for i in range(len(c_sizes.value))]
     a = w.pop(y)
     b = min(w)
     return (0,(b-a)/max(a,b))
@@ -74,12 +62,19 @@ def main():
     
     "sample clusters size"
     C_s = [len(s) for s in S_]
-    c_pr = [sum([dot(v,v) for v in vects]) for vects in S_]
-    c_sums = [list(map(sum, zip(*vects))) for vects in S_]
+    
+    "Sum of the squares of every vector in a cluster for every cluster in S_"
+    s_sq = [sum([dot(v,v) for v in vects]) for vects in S_]
+    
+    "Sum of every vector in a cluster for every cluster in S_"
+    s_sums = [list(map(sum, zip(*vects))) for vects in S_]
     
     samples = samples.collect()
     
     clusteringSample = sc.broadcast(samples)
+    sampleClusterSize = sc.broadcast(C_s)
+    sampleSquares = sc.broadcast(s_sq)
+    sampleSums = sc.broadcast(s_sums)
     
     start1 = time.time_ns()
     
@@ -91,7 +86,7 @@ def main():
         flag = 0
         if x in clusteringSample.value:
             flag = 1
-        sums = [(-2*dot(x,c_sums[i]) + c_pr[i] + C_s[i]*x_sq)/(C_s[i]-flag) for i in range(len(C_s))]
+        sums = [(-2*dot(x,s_sums[i]) + s_sq[i] + C_s[i]*x_sq)/(C_s[i]-flag) for i in range(len(C_s))]
         a = sums.pop(y)
         b = min(sums)
         s.append((b-a)/max(b,a))
@@ -101,7 +96,7 @@ def main():
     
     start0 = time.time_ns()
     
-    fullClustering = (fullClustering.map(lambda x: bigBrainMap(x,c_sums,c_pr, C_s, sharedClusterSize,t))
+    fullClustering = (fullClustering.map(lambda x: bigBrainMap(x,sampleSums,sampleSquares,sampleClusterSize,sharedClusterSize,t))
             .reduceByKey(add))
     approxSilhFull = float(fullClustering.collect()[0][1])/N
     
