@@ -12,6 +12,9 @@ def strToTuple(line):
     point = tuple(float(ch[i]) for i in range(len(ch)-1))
     return (point, int(ch[-1]))    
 
+def Bernoulli(p, n=1): 
+    return rand.choices([1,0], weights=[p, (1-p)], k=n)[0] 
+
 def bigBrainMap(elem, s_sums, s_squares, s_sizes, c_sizes, t):
     """ ---Sometimes midnight ideas are great---
         Main idea: decomposition of the overall distance per cluster
@@ -68,7 +71,7 @@ def main():
     sharedClusterSize = sc.broadcast(C)
     
     #Sampling
-    samples = fullClustering.map(lambda x : x if rand.random()<=min(t/sharedClusterSize.value[x[1]],1) else None).filter(lambda x: x!=None).cache()
+    samples = fullClustering.filter(lambda x: Bernoulli(min(t/sharedClusterSize.value[x[1]],1))).cache()
     S_ = sorted(samples.map(lambda x: (x[1],x[0])).groupByKey().collect())
     S_ = [list(x[1]) for x in S_]
     
