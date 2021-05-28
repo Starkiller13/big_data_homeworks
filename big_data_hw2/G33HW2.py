@@ -22,6 +22,16 @@ def map1(elem, smp, cl_s, t, k, S_):
     b = min(l_sums)
     return (0,(b-a)/max(b,a))
 
+
+def mp_1(elem, sq_N):
+    return (rand.randint(0,sq_N), elem)
+
+def red_1(elems, k=1):
+    l_sums = [0 for _ in range(0,k)]
+    for x in elems:
+        l_sums = [sum([dist(x,p) for p in S_[j]]) for j in range(0,k)]
+    return (0,l_sums)
+    
 def dist(x,y):
     l = sum([(x[i]-y[i])**2 for i in range(len(x))])
     return l
