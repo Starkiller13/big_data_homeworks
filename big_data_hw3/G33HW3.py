@@ -78,7 +78,6 @@ def main():
         C_final = [1 for _ in range(i)]
         for _ in C:
             C_final[_[0]] = _[1]
-        print(C_final)
         sharedClusterSize = sc.broadcast(C_final)
 
         #Sampling
