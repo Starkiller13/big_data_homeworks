@@ -70,7 +70,7 @@ def main():
         #Lloyds algorithm 
         start_cl = time.time()
         currentModel=KMeans.train(inputPoints,i,maxIterations=iter)
-        currentClustering = inputPoints.map(lambda x: (x,currentModel.predict(x)), preservesPartitioning=True).cache()
+        currentClustering = inputPoints.map(lambda x: (x,currentModel.predict(x)), preservesPartitioning=True)
         end_cl = time.time()
         #Pointest P cluster sizes
         C = sorted(currentClustering.map(lambda x: x[1]).countByValue().items())
@@ -82,7 +82,7 @@ def main():
         sharedClusterSize = sc.broadcast(C_final)
 
         #Sampling
-        samples = currentClustering.filter(lambda x: rand.random()<=min(t/sharedClusterSize.value[x[1]],1)).cache()
+        samples = currentClustering.filter(lambda x: rand.random()<=min(t/sharedClusterSize.value[x[1]],1))
         S_ = sorted(samples.map(lambda x: (x[1],x[0])).groupByKey().collect())
         S_ = [list(x[1]) for x in S_]
 
@@ -102,7 +102,7 @@ def main():
         sampleSums = sc.broadcast(s_sums)#sum of vector for every sample cluster
 
         start_mr = time.time()
-        currentClustering = (currentClustering.map(lambda x: bigBrainMap(x,sampleSums,sampleSquares,sampleClusterSize,sharedClusterSize,t)).cache()
+        currentClustering = (currentClustering.map(lambda x: bigBrainMap(x,sampleSums,sampleSquares,sampleClusterSize,sharedClusterSize,t))
                 .reduceByKey(add))
         approxSilhFull = float(currentClustering.collect()[0][1])/N
 
