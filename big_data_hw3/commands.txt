@@ -1,0 +1,9 @@
+DEI net access:
+
+    ssh account-name@login.dei.unipd.it
+
+CloudVeneto access:
+
+    ssh -p 2222 group33@147.162.226.106
+    pwd: Hadoop33
+
