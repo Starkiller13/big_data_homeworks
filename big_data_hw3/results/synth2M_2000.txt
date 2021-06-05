@@ -1,0 +1,26 @@
+Time for input reading = 35877 ms
+
+Number of clusters k = 8
+Silhouette coefficient = 0.923062
+Time for clustering = 9854 ms
+Time for silhouette computation = 6952 ms
+
+Number of clusters k = 9
+Silhouette coefficient = 0.941172
+Time for clustering = 5986 ms
+Time for silhouette computation = 6895 ms
+
+Number of clusters k = 10
+Silhouette coefficient = 0.998346
+Time for clustering = 5436 ms
+Time for silhouette computation = 7919 ms
+
+Number of clusters k = 11
+Silhouette coefficient = 0.941372
+Time for clustering = 8228 ms
+Time for silhouette computation = 8757 ms
+
+Number of clusters k = 12
+Silhouette coefficient = 0.886437
+Time for clustering = 8794 ms
+Time for silhouette computation = 9362 ms

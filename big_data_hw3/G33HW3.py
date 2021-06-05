@@ -12,18 +12,15 @@ def strToTuple(line):
     point = tuple(float(ch[i]) for i in range(len(ch)))
     return point
 
-def Bernoulli(p, n=1): 
-    return rand.choices([1,0], weights=[p, (1-p)], k=n)[0] 
-
-def bigBrainMap(elem, s_sums, s_squares, s_sizes, c_sizes, t):
+def bigBrainMap(elem, s_sums, s_squares, s_sizes):
     x = elem[0]
     y = elem[1]
     x_sq = dot(x,x)
-    w = [(-2*dot(x,s_sums.value[i]) + s_squares.value[i] + 
-          s_sizes.value[i]*x_sq)/s_sizes.value[i] for i in range(len(c_sizes.value))]
+    w = [(-2*dot(x,s_sums[i]) + s_squares[i] + 
+          s_sizes[i]*x_sq)/s_sizes[i] for i in range(len(s_sizes))]
     a = w.pop(y)
     b = min(w)
-    return (0,(b-a)/max(a,b))
+    return [(b-a)/max(a,b)]
 
 def dot(x,y):
     """simple dot product between two vectors"""
@@ -31,7 +28,7 @@ def dot(x,y):
 
 def main():
     assert len(sys.argv) == 7, "Usage: python G33HW2.py <file_name> <kstart> <h> <iter> <M> <L>"
-    
+
     conf = (SparkConf().setAppName('Homework3').set('spark.locality.wait','0s'))
     sc = SparkContext(conf=conf)
 
@@ -57,20 +54,21 @@ def main():
     L = sys.argv[6]
     assert L.isdigit(), "L must be an integer"
     L = int(L)
-    
+
     t_read0 = time.time()
     inputPoints = sc.textFile(data_path, minPartitions=L).cache()
+    inputPoints= inputPoints.map(strToTuple)
+    inputPoints = inputPoints.repartition(numPartitions=L)
     delta_t_read = time.time() - t_read0
     print("Time for input reading = %d ms\n"%(int(delta_t_read*1000)))
-    inputPoints = inputPoints.map(strToTuple)
     N = inputPoints.count()
     
     for i in range(kstart,kstart+h):
         t = M/i
         #Lloyds algorithm 
         start_cl = time.time()
-        currentModel=KMeans.train(inputPoints,i,maxIterations=iter)
-        currentClustering = inputPoints.map(lambda x: (x,currentModel.predict(x)), preservesPartitioning=True)
+        currentModel=sc.broadcast(KMeans.train(inputPoints,i,maxIterations=iter))
+        currentClustering = inputPoints.map(lambda x: (x,currentModel.value.predict(x))).cache()
         end_cl = time.time()
         #Pointest P cluster sizes
         C = sorted(currentClustering.map(lambda x: x[1]).countByValue().items())
@@ -94,17 +92,13 @@ def main():
         #Sum of every vector in a cluster for every cluster in S_
         s_sums = [list(map(sum, zip(*vects))) for vects in S_]
 
-        samples = samples.collect()
-
         sampleClusterSize = sc.broadcast(C_s)#cluster size of sample
         sampleSquares = sc.broadcast(s_sq)#sum of squares for every sample clusterg gg
         sampleSums = sc.broadcast(s_sums)#sum of vector for every sample cluster
 
         start_mr = time.time()
-        currentClustering = (currentClustering.map(lambda x: bigBrainMap(x,sampleSums,sampleSquares,sampleClusterSize,sharedClusterSize,t))
-                .reduceByKey(add))
-        approxSilhFull = float(currentClustering.collect()[0][1])/N
-
+        currentClustering = currentClustering.flatMap(lambda x: bigBrainMap(x,sampleSums.value,sampleSquares.value,sampleClusterSize.value)).cache()
+        approxSilhFull = float(currentClustering.fold(0,add))/N
         end_mr = time.time()
 
         print("Number of clusters k = %d"%(i))
