@@ -9,21 +9,19 @@ In the RDD-based API of the mllib package, Spark provides an implementation of L
 
 Assignment
 You must write a program GxxHW3.java (for Java users) or GxxHW3.py (for Python users), where xx is your two-digit group number, which receives in input, as command-line arguments, the following data (in this ordering)
+      A path to a text file containing a point set in Euclidean space. Each line of the file contains the coordinates of a point separated by spaces. (Your program should make no assumptions on the number of dimensions!)
+      An integer kstart which is the initial number of clusters.
+      An integer h which is the number of values of k that the program will test.   
+      An integer iter which is the number of iterations of Lloyd's algorithm.
+      An integer M which is the expected size of the sample used to approximate the silhouette coefficient.
+      An integer L which is the number of partitions of the RDDs containing the input points and their clustering.
 
-A path to a text file containing a point set in Euclidean space. Each line of the file contains the coordinates of a point separated by spaces. (Your program should make no assumptions on the number of dimensions!)
-An integer kstart which is the initial number of clusters.
-An integer h which is the number of values of k that the program will test.
-An integer iter which is the number of iterations of Lloyd's algorithm.
-An integer M which is the expected size of the sample used to approximate the silhouette coefficient.
-An integer L which is the number of partitions of the RDDs containing the input points and their clustering.
 The program must do the following (recycle pieces of code from Homework 2 where appropriate):
-
-Reads the various parameters passed as command-line arguments. In particular, the set of points must be stored into an RDD called inputPoints, which must be cached and subdivided into L partitions. Two notices: (a) in the input file the coordinates of the points are separated by spaces and not by commas as in Homework 2, so take this into account where adapting the reading method used in Homework 2; (b) the textfile method invoked from the Spark context, which you will use to read the input textfile into an RDD, is able to read gzipped files as well.  After reading the parameters print the time spent to read the input points.
-For every k between kstart and kstart+h-1 does the following
-Computes a clustering of the input points with k clusters, using the Spark implementation of Lloyd's algorithm described above with iter iterations. The clustering must be stored into an RDD currentClustering of pairs (point, cluster_index) with as many elements as the input points. The RDD must be cached and partitioned into L partitions. (If computed by transforming each element of inputPoints with a map method, it should inherit its partitioning.) 
-Computes the approximate average silhouette coefficient of the clustering stored in the RDD currentClustering using the approximation algorithm implemented and tested in Homework 2, with t=M/k. In particular, the approximate silhouette coefficient of each point must be computed using a sample obtained by selecting min{t,|C|} points from each cluster C, in expectation.
-Prints the following values: (a) the value k; (b) the value of the approximate average silhouette coefficient; (c) the time spent to compute the clustering; (d) the time spent to compute the silhouette (which must include the time to extract the sample).Times must be in ms.
-Use the output format given in this example (kstart=5, h=3).
+      Reads the various parameters passed as command-line arguments. In particular, the set of points must be stored into an RDD called inputPoints, which must be cached and subdivided into L partitions. Two notices: (a) in the input file the coordinates of the points are separated by spaces and not by commas as in Homework 2, so take this into account where adapting the reading method used in Homework 2; (b) the textfile method invoked from the Spark context, which you will use to read the input textfile into an RDD, is able to read gzipped files as well.  After reading the parameters print the time spent to read the input points.
+      For every k between kstart and kstart+h-1 does the following
+      Computes a clustering of the input points with k clusters, using the Spark implementation of Lloyd's algorithm described above with iter iterations. The clustering must be stored into an RDD currentClustering of pairs (point, cluster_index) with as many elements as the input points. The RDD must be cached and partitioned into L partitions. (If computed by transforming each element of inputPoints with a map method, it should inherit its partitioning.) 
+      Computes the approximate average silhouette coefficient of the clustering stored in the RDD currentClustering using the approximation algorithm implemented and tested in Homework 2, with t=M/k. In particular, the approximate silhouette coefficient of each point must be computed using a sample obtained by selecting min{t,|C|} points from each cluster C, in expectation.
+      Prints the following values: (a) the value k; (b) the value of the approximate average silhouette coefficient; (c) the time spent to compute the clustering; (d) the time spent to compute the silhouette (which must include the time to extract the sample).Times must be in ms.
 
 IMPORTANT: To define the Spark configuration in your program, use the following instructions:
 
