@@ -12,7 +12,7 @@ pip install pyspark
 # Homework 1: User Ratings
 Basis of Map Reduce paradigm, our goal was to fetch and make some 
 operations over a online shopping dataset of reviews.
-Original instructions can be found [here](hw1_description)
+Original instructions can be found [here](/big_data_hw1/hw1_description)
 
 Usage(starting from the main directory)
 ```bash
@@ -26,7 +26,7 @@ Mark: 7.0/7.0
 Starting from an already clustered pointset we had to compute an 
 approximate silhouette coefficient for the entire pointset and 
 the exact silhouette coefficient for a sample obtained using poisson sampling.
-Original instructions can be found [here](hw2_description)
+Original instructions can be found [here](/big_data_hw2/hw2_description)
 
 Usage(starting from the main directory)
 ```bash
@@ -47,7 +47,7 @@ value *t* in each iteration and *L* that defines the number of partition in whic
 be split. 
 This time we had to use the CluodVeneto infrastructure to execute the computations; we logged in the 
 server through ssh via another ssh connection to the local login server of the departement (DEI).
-More infos on the experiments made can be found [here](hw3_description)
+More infos on the experiments made can be found [here](/big_data_hw3/hw3_description)
 
 Normal usage(no CloudVeneto):
 ```bash
