@@ -1,4 +1,4 @@
-# Bid Data Homeworks (unipd 2020/2021)
+# Big Data Homeworks (unipd 2020/2021)
 
 Made by Andrea Costalonga, Elena Bettella, Amanpreet Singh
 

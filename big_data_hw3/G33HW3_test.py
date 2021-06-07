@@ -24,7 +24,10 @@ def bigBrainMap(elem, s_sums, s_squares, s_sizes):
 
 def dot(x,y):
     """simple dot product between two vectors"""
-    return sum([x[i]*y[i] for i in range(len(x))])
+    out = 0
+    for k in range(len(x)):
+        out += x[k] * y[k]
+    return out
 
 def main():
     assert len(sys.argv) == 7, "Usage: python G33HW2.py <file_name> <kstart> <h> <iter> <M> <L>"
