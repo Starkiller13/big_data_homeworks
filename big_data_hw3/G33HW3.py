@@ -59,16 +59,14 @@ def main():
     inputPoints = sc.textFile(data_path, minPartitions=L).cache()
     inputPoints= inputPoints.map(strToTuple)
     inputPoints = inputPoints.repartition(numPartitions=L)
-    N = inputPoints.count()
     delta_t_read = time.time() - t_read0
+    N = inputPoints.count()
     print("Time for input reading = %d ms\n"%(int(delta_t_read*1000)))
-    
-    
     for k in range(kstart,kstart+h):
         t = M/k
         #Lloyds algorithm 
         start_cl = time.time()
-        currentModel=sc.broadcast(KMeans.train(inputPoints,k,maxIterations=iter))
+        currentModel = sc.broadcast(KMeans.train(inputPoints,k,maxIterations=iter))
         currentClustering = inputPoints.map(lambda x: (x,currentModel.value.predict(x))).cache()
         end_cl = time.time()
         #Pointest P cluster sizes

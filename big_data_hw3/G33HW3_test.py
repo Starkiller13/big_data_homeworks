@@ -1,14 +1,16 @@
 from pyspark import SparkContext, SparkConf
+from pyspark.sql import SparkSession
 from pyspark.mllib.clustering import KMeans, KMeansModel
 import sys
 import os
 import random as rand
 from operator import add
 import time
+import matplotlib.pyplot as plt
 
 def strToTuple(line):
     """Input parsing function"""
-    ch = line.strip().split(" ")
+    ch = line.split(b" ")
     point = tuple(float(ch[i]) for i in range(len(ch)))
     return point
 
@@ -24,10 +26,7 @@ def bigBrainMap(elem, s_sums, s_squares, s_sizes):
 
 def dot(x,y):
     """simple dot product between two vectors"""
-    out = 0
-    for k in range(len(x)):
-        out += x[k] * y[k]
-    return out
+    return sum([x[i]*y[i] for i in range(len(x))])
 
 def main():
     assert len(sys.argv) == 7, "Usage: python G33HW2.py <file_name> <kstart> <h> <iter> <M> <L>"
@@ -59,19 +58,22 @@ def main():
     L = int(L)
 
     t_read0 = time.time()
-    inputPoints = sc.textFile(data_path, minPartitions=L).cache()
+    inputPoints = sc.textFile(data_path, minPartitions=L,use_unicode=False).cache()
     inputPoints= inputPoints.map(strToTuple)
     inputPoints = inputPoints.repartition(numPartitions=L)
-    N = inputPoints.count()
     delta_t_read = time.time() - t_read0
+    N = inputPoints.count()
+    points = inputPoints.collect()
+    p0 = [_[0]for _ in points]
+    p1 = [_[1]for _ in points]
+    plt.plot(p0,p1,'o')
+    plt.savefig('pointset10K.png')
     print("Time for input reading = %d ms\n"%(int(delta_t_read*1000)))
-    
-    
     for k in range(kstart,kstart+h):
         t = M/k
         #Lloyds algorithm 
         start_cl = time.time()
-        currentModel=sc.broadcast(KMeans.train(inputPoints,k,maxIterations=iter))
+        currentModel = sc.broadcast(KMeans.train(inputPoints,k,maxIterations=iter))
         currentClustering = inputPoints.map(lambda x: (x,currentModel.value.predict(x))).cache()
         end_cl = time.time()
         #Pointest P cluster sizes

@@ -1,6 +1,6 @@
-Time for input reading = 167857 ms
+Time for input reading = 648 ms
 
 Number of clusters k = 5
-Silhouette coefficient = 0.490322
-Time for clustering = 25665 ms
-Time for silhouette computation = 24691 ms
+Silhouette coefficient = 0.444645
+Time for clustering = 23279 ms
+Time for silhouette computation = 22742 ms
